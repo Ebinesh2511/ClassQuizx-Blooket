@@ -4,9 +4,88 @@ SPDX-FileCopyrightText: 2023 Marlon W (Mawoka)
 SPDX-License-Identifier: MPL-2.0
 -->
 
-> **New: QuizQuest** 🦊🪙 is a redesigned, playful version of this app in [`quest/`](quest/README.md).
-> It has Gold Quest (default) and Classic modes, random animal avatars, CSV quiz upload, a live host leaderboard and QR-code joining.
-> Run it with `cd quest && npm install && npm run dev`.
+# ClassQuiz × Blooket: QuizQuest 🦊🪙
+
+> **This is a fork of [mawoka-myblock/ClassQuiz](https://github.com/mawoka-myblock/ClassQuiz).**
+> It adds **QuizQuest**, a revamped, playful quiz app in the [`quest/`](quest/README.md) folder. It brings Blooket's
+> **[Gold Quest](https://help.blooket.com/hc/en-us/articles/42100784373655-Game-Overview-Gold-Quest)** game mode as the **default**,
+> and keeps a Kahoot-style **Classic** mode.
+
+## What's new in this fork
+
+- **Gold Quest is the default mode.** Answer correctly, then pick one of 3 treasure chests: gold, double or triple gold, take 10% or 25% from a player, swap gold, lose gold to the dragon, or win the Dragon's Treasure. Most gold wins.
+- **Classic mode** is host-paced. Faster correct answers score more, with streak bonuses.
+- **Revamped UI.** It's bright and playful, with bouncy 3D buttons, chest-opening animations, confetti, a podium reveal and sound effects. It works on phones and on projectors.
+- **Random funny animal avatars** ("Sneaky Llama", "Disco Penguin") that players can reroll or customise with colours and hats.
+- **CSV quiz upload** by drag and drop. Blooket's CSV template is supported too.
+- **Host screen** with a live action feed (newest on top) and a live leaderboard on the right.
+- **A QR code and 6-digit Game ID for every game**, so players can scan and join from their phones.
+- No database or login needed. QuizQuest runs as a single Node.js server.
+
+## Self-hosting QuizQuest
+
+### Option 1: Node.js (v20 or newer)
+
+```bash
+git clone https://github.com/Ebinesh2511/ClassQuizx-Blooket.git
+cd ClassQuizx-Blooket/quest
+npm install
+npm run build
+npm start                 # serves on http://localhost:3000
+```
+
+Use `PORT=8080 npm start` to change the port. For development with hot reload, use `npm run dev`.
+
+### Option 2: Docker
+
+```bash
+cd ClassQuizx-Blooket/quest
+docker build -t quizquest .
+docker run -d --name quizquest -p 3000:3000 --restart unless-stopped quizquest
+```
+
+### Letting players join
+
+- **Same Wi-Fi (classroom):** open `http://localhost:3000` on the host computer and click **Host a game**. The QR code automatically uses your computer's network address, such as `http://192.168.1.7:3000`, so phones on the same Wi-Fi can scan it. Allow port 3000 through your firewall if phones can't connect.
+- **Public domain:** put QuizQuest behind a reverse proxy with HTTPS and set `PUBLIC_URL` so the QR code points to your domain:
+
+  ```bash
+  docker run -d -p 3000:3000 -e PUBLIC_URL=https://quiz.example.com quizquest
+  ```
+
+  The proxy must forward WebSockets. Caddy does this out of the box:
+
+  ```
+  quiz.example.com {
+      reverse_proxy localhost:3000
+  }
+  ```
+
+  With nginx, add `proxy_set_header Upgrade $http_upgrade;` and `proxy_set_header Connection "upgrade";` to the location block.
+
+### Hosting a game
+
+1. Click **Host a game**, then drop in a CSV file. You can also try the sample quiz or download the CSV template.
+2. Pick **Gold Quest** (the default) or **Classic**, and choose the settings: a time limit or gold goal, or the time per question.
+3. Click **Host now**. Players scan the QR code or enter the Game ID, then pick a nickname and animal.
+4. Click **Start**. The host screen shows live action and the leaderboard, and a podium appears at the end.
+
+CSV format:
+
+```csv
+Question,Answer 1,Answer 2,Answer 3,Answer 4,Correct Answer,Time Limit
+How many legs does a spider have?,6,8,10,12,2,15
+```
+
+The correct answer can be a number, a letter or the answer text. Use `1;3` for multiple correct answers. See [`quest/README.md`](quest/README.md) for full details, the bot script and tests.
+
+> Games are kept in memory, so restarting the server ends running games.
+
+---
+
+## Original ClassQuiz README
+
+The upstream ClassQuiz app (with accounts, editor and database) is still in this repo, unchanged. Its original documentation follows.
 
 
 <a href="https://github.com/mawoka-myblock/ClassQuiz/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/mawoka-myblock/classquiz?style=for-the-badge"></a>
